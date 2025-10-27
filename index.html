@@ -1,77 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault 8166</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: black;
-            color: white;
-            line-height: 1.6;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vault 8166</title>
+  <style>
+    :root {
+      --bg: #000;
+      --text: #fff;
+      --accent: #e11; /* red */
+      --accent-dark: #8a0b0b;
+    }
 
-        header {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-        }
+    html,body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
 
-        header img {
-            height: 60px;
-        }
+    header {
+      display:flex;
+      align-items:center;
+      gap:16px;
+      padding:18px 22px;
+      position:sticky;
+      top:0;
+      z-index:10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0.65));
+      backdrop-filter: blur(2px);
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
 
-        main {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+    header img {
+      height:56px;
+      width:auto;
+      display:block;
+      image-rendering: -webkit-optimize-contrast;
+    }
 
-        h1 {
-            margin-bottom: 20px;
-        }
+    main {
+      max-width:900px;
+      margin:40px auto;
+      padding:0 20px 120px;
+    }
 
-        p {
-            margin-bottom: 30px;
-        }
+    h1 {
+      margin:0 0 18px;
+      font-size: clamp(22px, 3vw, 36px);
+      letter-spacing: -0.02em;
+    }
 
-        .buttons {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
+    p {
+      color:var(--text);
+      opacity:0.95;
+      font-size:16px;
+      line-height:1.65;
+      margin-bottom:28px;
+    }
 
-        .buttons a {
-            display: inline-block;
-            padding: 15px 30px;
-            background-color: red;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
+    .buttons {
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+    }
 
-        .buttons a:hover {
-            background-color: darkred;
-        }
-    </style>
+    .btn {
+      background:var(--accent);
+      color:var(--text);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 18px;
+      border-radius:8px;
+      font-weight:700;
+      cursor:pointer;
+      border: none;
+      transition: transform .08s ease, background .12s ease, box-shadow .12s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6), inset 0 -2px 0 rgba(0,0,0,0.15);
+    }
+
+    .btn:active { transform: translateY(1px) scale(.998); }
+    .btn:hover { background: var(--accent-dark); }
+
+    /* Modal */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.65);
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .overlay.show { display:flex; }
+
+    .modal {
+      background: linear-gradient(180deg, rgba(20,20,20,0.98), rgba(7,7,7,0.98));
+      border: 1px solid rgba(255,255,255,0.04);
+      padding: 20px;
+      max-width: 520px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.8);
+      color: var(--text);
+    }
+
+    .modal h2 { margin:0 0 10px; font-size:18px; }
+    .keybox {
+      margin:14px 0 18px;
+      padding:12px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius:8px;
+      font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+      font-size:16px;
+      word-break: break-all;
+      user-select: all;
+    }
+
+    .modal .row { display:flex; gap:10px; align-items:center; }
+    .copy-btn {
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--text);
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .close-btn {
+      margin-left:auto;
+      background:transparent;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .hint {
+      margin-top:10px;
+      font-size:13px;
+      opacity:0.8;
+    }
+
+    footer {
+      margin-top:80px;
+      padding:30px 20px;
+      color:rgba(255,255,255,0.5);
+      font-size:13px;
+      text-align:center;
+    }
+
+    /* small responsive tweaks */
+    @media (max-width:520px){
+      header { padding:12px 14px; }
+      .btn { padding:10px 14px; font-size:14px; }
+      main { margin:24px auto; }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <img src="https://media.discordapp.net/attachments/1426085890425491458/1432171939950231726/noFilter_54.png?ex=6900158e&is=68fec40e&hm=f109d613b1805267f960a497f5a72e47f9753cce21bf844956f0562718c5fc72&=&format=webp&quality=lossless" alt="Vault 8166 Logo">
-    </header>
-    <main>
-        <h1>Welcome to Vault 8166</h1>
-        <p>
-            Vault 8166 is a remote server on Roblox where unexplainable things beyond usual are occurring. It is a secret map run by unknown hackers, and created by builder4543 who can watch or monitor activity between users. It is said that anyone who goes there can gain access to certain information on Roblox and obtain access to an entire database of installations, GUIs, and programs. This facility is the birthplace of the most dangerous exploits in the games. Software, bots, or viruses are also stored here that have been placed and hidden into Roblox models or plugins. The intentions and history of this place are private.
-        </p>
-        <div class="buttons">
-            <a href="#">The Game</a>
-            <a href="#">Get a Server Key</a>
-        </div>
-    </main>
+  <header>
+    <img src="https://media.discordapp.net/attachments/1426085890425491458/1432171939950231726/noFilter_54.png?ex=6900158e&is=68fec40e&hm=f109d613b1805267f960a497f5a72e47f9753cce21bf844956f0562718c5fc72&=&format=webp&quality=lossless"
+         alt="Vault 8166 logo" />
+  </header>
+
+  <main>
+    <h1>Welcome to Vault 8166</h1>
+
+    <p>
+      Vault 8166 is a remote server on Roblox where unexplainable things beyond usual are occurring.
+      It is a secret map run by unknown hackers, and created by builder4543 who can watch or monitor activity between users.
+      It is said that anyone who goes there can gain access to certain information on Roblox and obtain access to an entire database of installations, GUIs, and programs.
+      This facility is the birthplace of the most dangerous exploits in the games.
+      Software, bots, or viruses are also stored here that have been placed and hidden into Roblox models or plugins.
+      The intentions and history of this place are private.
+    </p>
+
+    <div class="buttons" role="group" aria-label="actions">
+      <a class="btn" id="playBtn" href="https://www.roblox.com/games/93763933/Vault-8166" target="_blank" rel="noopener noreferrer">The Game</a>
+      <button class="btn" id="keyBtn" type="button">Get a Server Key</button>
+    </div>
+
+    <footer>
+      <div>Vault 8166 — private facility. Use with caution. The content above is for roleplay / informational display.</div>
+    </footer>
+  </main>
+
+  <!-- Modal for server key -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <h2 id="modalTitle">Your Server Key</h2>
+        <button class="close-btn" id="modalClose" aria-label="Close">Close ✕</button>
+      </div>
+
+      <div class="keybox" id="keyBox" tabindex="0" aria-live="polite"></div>
+
+      <div class="row">
+        <button class="copy-btn" id="copyBtn">Copy Key</button>
+        <button class="copy-btn" id="regenBtn">Regenerate</button>
+        <div style="margin-left:auto;font-size:13px;color:rgba(255,255,255,0.65)" id="copiedLabel"></div>
+      </div>
+
+      <div class="hint">Click "Copy Key" to copy. Click outside the box or "Close" to close this GUI.</div>
+    </div>
+  </div>
+
+  <script>
+    // utilities
+    const overlay = document.getElementById('overlay');
+    const keyBox = document.getElementById('keyBox');
+    const copyBtn = document.getElementById('copyBtn');
+    const regenBtn = document.getElementById('regenBtn');
+    const keyBtn = document.getElementById('keyBtn');
+    const modalClose = document.getElementById('modalClose');
+    const copiedLabel = document.getElementById('copiedLabel');
+
+    // generate a random key similar to the example
+    function randomChar() {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      const symbols = "()-._";
+      // heavier chance for letters/digits
+      return Math.random() < 0.88
+        ? chars.charAt(Math.floor(Math.random() * chars.length))
+        : symbols.charAt(Math.floor(Math.random() * symbols.length));
+    }
+
+    function genSegment(minLen=6, maxLen=12) {
+      const len = Math.floor(Math.random() * (maxLen - minLen + 1)) + minLen;
+      let s = "";
+      for (let i=0;i<len;i++) s += randomChar();
+      return s;
+    }
+
+    function generateKey() {
+      // format: <seg>-<seg>-<seg>
+      const seg1 = genSegment(8,12);
+      const seg2 = genSegment(8,12);
+      // include occasional parentheses in middle segment like example
+      const seg3 = genSegment(8,14);
+      return [seg1, seg2, seg3].join('-');
+    }
+
+    function showModalWithKey() {
+      const key = generateKey();
+      keyBox.textContent = key;
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden','false');
+      copiedLabel.textContent = '';
+      // focus so keyboard users can copy/select
+      keyBox.focus();
+    }
+
+    function closeModal() {
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+      // small clear
+      copiedLabel.textContent = '';
+    }
+
+    keyBtn.addEventListener('click', () => {
+      showModalWithKey();
+    });
+
+    regenBtn.addEventListener('click', () => {
+      const key = generateKey();
+      keyBox.textContent = key;
+      copiedLabel.textContent = '';
+      keyBox.focus();
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const text = keyBox.textContent.trim();
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        copiedLabel.textContent = 'Copied!';
+        // briefly show feedback
+        setTimeout(()=> copiedLabel.textContent = '', 1800);
+      } catch (err) {
+        // fallback: select and execCommand
+        const range = document.createRange();
+        range.selectNodeContents(keyBox);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        try {
+          document.execCommand('copy');
+          copiedLabel.textContent = 'Copied!';
+          setTimeout(()=> copiedLabel.textContent = '', 1800);
+        } catch (err2) {
+          copiedLabel.textContent = 'Copy failed';
+          setTimeout(()=> copiedLabel.textContent = '', 1800);
+        }
+      }
+    });
+
+    modalClose.addEventListener('click', closeModal);
+
+    // clicking outside modal closes
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    // close with Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('show')) {
+        closeModal();
+      }
+    });
+
+    // ensure "The Game" link opens in new tab (already set in markup)
+    document.getElementById('playBtn').addEventListener('click', (e) => {
+      // no-op; link already opens. placeholder for any tracking.
+    });
+  </script>
 </body>
 </html>
+
